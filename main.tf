@@ -1,7 +1,8 @@
-
 provider "aws" {
   region = var.aws_region
 }
+
+data "aws_availability_zones" "available" {}
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -14,29 +15,31 @@ module "vpc" {
   private_subnets = var.private_subnets
   public_subnets  = var.public_subnets
 
+  enable_nat_gateway = true
+  single_nat_gateway = true
   enable_dns_hostnames = true
   enable_dns_support   = true
 
   tags = {
-    Terraform = "true"
     Environment = var.environment
+    Terraform   = "true"
   }
 }
 
 module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
-  version         = "20.4.0"
+  source  = "terraform-aws-modules/eks/aws"
+  version = "20.4.0"
 
   cluster_name    = var.cluster_name
   cluster_version = "1.29"
-  subnet_ids      = module.vpc.private_subnets
   vpc_id          = module.vpc.vpc_id
+  subnet_ids      = module.vpc.private_subnets
 
   enable_irsa = true
 
   eks_managed_node_group_defaults = {
-    ami_type       = "AL2_x86_64"
     instance_types = ["t3.medium"]
+    ami_type       = "AL2_x86_64"
   }
 
   eks_managed_node_groups = {
@@ -44,8 +47,6 @@ module "eks" {
       desired_size = 2
       max_size     = 3
       min_size     = 1
-      instance_types = ["t3.medium"]
-      capacity_type  = "ON_DEMAND"
     }
   }
 
@@ -54,5 +55,3 @@ module "eks" {
     Terraform   = "true"
   }
 }
-
-data "aws_availability_zones" "available" {}
