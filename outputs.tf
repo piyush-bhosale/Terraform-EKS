@@ -1,11 +1,10 @@
-
 output "cluster_name" {
   description = "EKS Cluster name"
   value       = module.eks.cluster_name
 }
 
 output "cluster_endpoint" {
-  description = "EKS Cluster endpoint"
+  description = "EKS Cluster API endpoint"
   value       = module.eks.cluster_endpoint
 }
 
@@ -15,6 +14,6 @@ output "cluster_security_group_id" {
 }
 
 output "node_group_role_arn" {
-  description = "IAM role ARN for the node group"
+  description = "IAM role ARN for the EKS managed node group"
   value       = module.eks.eks_managed_node_groups["default"].iam_role_arn
 }
